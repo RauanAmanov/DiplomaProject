@@ -1,0 +1,39 @@
+﻿@model Book
+<h3>@(Model == null || (Model != null && Model.Id == 0) ? "Добавление книги" : "Редактирование книги")</h3>
+<hr />
+@Html.ValidationSummary(false, "", new { @class = "text-danger" })
+<a href="~/Book/Books" class="mt-3 mb-3">Отмена</a>
+<form enctype="multipart/form-data" method="post">
+    @Html.HiddenFor(m => m.Id)
+    <table class="table-sm">
+        <tr>
+            <td>Имя</td>
+            <td>@Html.TextBoxFor(m => m.Name, new { @class = "form-control" })</td>
+        </tr>
+        <tr>
+            <td>Автор</td>
+            <td>
+                @Html.DropDownListFor(m => m.AuthorId, ViewBag.Authors as SelectList, new { @class = "form-control" })
+            </td>
+            <td>Издательство</td>
+            <td>
+                @Html.DropDownListFor(m => m.PublisherId, ViewBag.Publishers as SelectList, new { @class = "form-control" })
+            </td>
+        </tr>
+        <tr>
+            <td>Файл</td>
+            <td>
+                <input class="form-control-file" accept=".pdf, .docx, .doc" name="File" type="file" />
+            </td>
+            <td>Обложка</td>
+            <td>
+                <input class="form-control-file" accept=".jpeg, .jpg, .png" name="Image" type="file" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input class="btn btn-success" type="submit" value="@(Model == null || (Model != null && Model.Id == 0) ? "Добавить" : "Изменить")" />
+            </td>
+        </tr>
+    </table>
+</form>

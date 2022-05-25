@@ -1,0 +1,110 @@
+﻿@model ResponseViewModel
+@{
+    ViewData["Title"] = Model.QuestionnaireQuestion.Question.Question_;
+    int i = 0;
+    int j = 0;
+    int k = 0;
+}
+@section Styles{
+    <style>
+        .content1 > #demo {
+            font-size: 42px;
+            height: 60px;
+        }
+    </style>
+}
+@using (Html.BeginForm()) {
+    @Html.HiddenFor(m => m.QuestionnaireQuestion.Id)
+    <div class="content1 d-flex justify-content-between">
+        <div style="width: 300px">
+            <table class="table table-sm table-bordered">
+                <tr>
+                    @foreach (var a in Model.QuestionnaireQuestions) {
+                        <td @if (Model.Responses.Any(r => r.QuestionnaireQuestionId == a.Id)) { @: bgcolor=#f3e5ab
+                            }>
+                            <a href="~/Response/QuestionnaireQuestion?id=@a.Id">@(++i)</a>
+                        </td>
+                        @if (a.Id == Model.QuestionnaireQuestion.Id) j = i;
+                        @if (i % 10 == 0) {
+                        @: </tr> <tr>
+                        }
+                    }
+                </tr>
+            </table>
+        </div>
+        <div id="demo"></div>
+    </div>
+
+    <h5>Вопрос № @j</h5>
+    <h5><pre>@Model.QuestionnaireQuestion.Question.Question_</pre></h5>
+    @Html.HiddenFor(m => m.NextId);
+    if (Model.QuestionnaireQuestion.IsMultiSelect) {
+        foreach (var m in Model.Answers) {
+            <div class="option">
+                <p>
+                    @Html.CheckBox($"ResponseHelpers[{k}].IsChecked", Model.ResponseHelpers.
+                   Any(r => r.Response.AnswerId == m.Id), new { @id = "" })
+                    @Html.Hidden($"ResponseHelpers[{k}].Response.AnswerId", m.Id)
+                    @Html.Hidden($"ResponseHelpers[{k}].Response.Id", Model.ResponseHelpers.
+                   FirstOrDefault(r => r.Response.AnswerId == m.Id)?.Response.Id ?? 0)
+                    &nbsp; @m.Answer_
+                </p>
+            </div>
+            k++;
+        }
+    } else {
+        foreach (var m in Model.Answers) {
+            <div class="option">
+                <p>
+                    <input required type="radio" name="ResponseHelpers[0].Response.AnswerId" value="@m.Id" @(Model.ResponseHelpers.Any(rh => rh.Response.AnswerId == m.Id) ? "checked" : "") />
+                    &nbsp; @m.Answer_
+                    @Html.Hidden($"ResponseHelpers[0].Response.Id", Model.ResponseHelpers.FirstOrDefault(r => r.Response.AnswerId == m.Id)?.Response.Id ?? 0)
+                </p>
+            </div>
+        }
+    }
+    <a href="~/Response/QuestionnaireQuestion?id=@Model.PreviousId" class="btn btn-danger@(!Model.PreviousId.HasValue?" disabled":"")">Назад</a>@:&nbsp; &nbsp;
+    <button type="submit" class="btn btn-primary">Сохранить</button> @: &nbsp; &nbsp;
+    <a href="~/Response/QuestionnaireQuestion?id=@Model.NextId" class="btn btn-success@(!Model.NextId.HasValue?" disabled":"")">Вперёд</a>
+}
+@section Scripts{
+    <script>
+        @{
+          var countDownDate = Model.StartDate.
+            AddSeconds(60 * Model.QuestionnaireQuestions.Count);
+          string date = countDownDate.ToString("o") + (countDownDate.ToString("o").EndsWith('Z')?"":"Z");
+        }
+
+        var countDownDate = new Date('@date').getTime();
+
+        var x = setInterval(function () {
+            var now = new Date().getTime();
+
+            var distance = countDownDate - now;
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)) + days * 24;
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            var timeLeft = (hours > 0 ? hours + ":" : "") + minutes + ":" + seconds.toString().padStart(2, "0");
+
+            document.getElementById("demo").innerHTML = timeLeft;
+
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("demo").classList.add('text-danger');
+                document.getElementById("demo").innerHTML = 'Время вышло';
+                window.location.href = '@Url.Content($"~/Response/FinishQuestionnaire?id={Model.ResponseSessionId}")';
+            }
+        }, 1000);
+        $(function () {
+            $(".option").on('click', function () {
+                var input = $(this).find('input');
+                input.prop('checked', !input.prop('checked'));
+            });
+            $("input").click(function (event) {
+                event.stopPropagation();
+            });
+        });
+    </script>
+}

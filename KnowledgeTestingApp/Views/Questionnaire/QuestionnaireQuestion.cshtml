@@ -1,0 +1,76 @@
+﻿@model QuestionnaireQuestion
+@{
+    ViewData["Title"] = Model == null ? "Новый вопрос" : "Редактирование вопроса";
+    int i = 0;
+}
+<h3>@(Model == null ? "Новый вопрос" : "Редактирование вопроса")</h3>
+@Html.ActionLink("Назад", "QuestionnaireQuestions", new { id = Model.QuestionnaireId })
+@using (Html.BeginForm()) {
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.QuestionnaireId)
+    <p>
+        Текст вопроса
+        @Html.TextAreaFor(m => m.Question.Question_, new { @class = "form-control", @rows = 7 })
+    </p>
+    <p>
+        Множественный выбор <br />
+        @Html.CheckBoxFor(m => m.IsMultiSelect)
+    </p><div class="answersBlock">
+        @if (ViewBag.Options != null) {
+            @foreach (var o in ViewBag.Options) {
+                <div class="option">
+                    <h4>Вариант ответа № @(i+1)</h4>
+                    <input type="hidden" name="options[@(i)].Answer.Id" value="@o.Answer.Id" />
+                    <p>
+                        Текст ответа<br />
+                        <textarea rows='7' name="options[@(i)].Answer.Answer_" class="form-control">@o.Answer.Answer_</textarea>
+                    </p>
+                    <p>
+                        Правильный ответ &nbsp;&nbsp; @Html.CheckBox($"options[{i++}].IsCorrect", ((KnowledgeTestingApp.ViewModels.QuestionnaireAnswerModel)o).IsCorrect, new { @id = "" })
+                    </p>
+                </div>
+            }
+            i--;
+        } else {
+            <div class="option">
+                <h4>Вариант ответа № 1</h4>
+                <p>
+                    Текст ответа<br />
+                    <textarea rows='7' class="form-control" name="options[0].Answer.Answer_"></textarea>
+                </p>
+                <p>
+                    Правильный ответ &nbsp;&nbsp; @Html.CheckBox("options[0].IsCorrect", false, new { @id = "" })
+                </p>
+            </div>
+        }
+    </div>
+    <p><a class="addLink">Добавить ответ</a></p>
+    <p><a class="removeLink">Удалить ответ</a></p>
+    <p>
+        <input type="submit" value="Сохранить" />
+    </p>
+}
+@section Scripts {
+    <script>
+        $(function () {
+            var i = @i;
+            $("form>.input[type='checkbox']").remove();
+            $(".addLink").click(function () {
+                i++;
+                var newElement = "<div class='option'><h4>Вариант ответа № " + (i + 1)
+                    + "</h4><p>Текст ответа<br/><textarea rows='7' class='form-control' name='options[" + i
+                    + "].Answer.Answer_'></textarea></p><p>Правильный ответ &nbsp;&nbsp; <input name='options[" + i + "].IsCorrect' type='checkbox' value='true'></p></div>";
+
+                $(".answersBlock").append(newElement);
+            });
+            $(".removeLink").click(function () {
+                if (i > 0) {
+                    var selector = ".answersBlock > div:has(textarea[name='options[" + i + "].Answer.Answer_'])";
+                    $(selector).remove();
+                    i--;
+                }
+            });
+
+        });
+    </script>
+}

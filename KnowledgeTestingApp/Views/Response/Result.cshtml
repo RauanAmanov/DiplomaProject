@@ -1,0 +1,98 @@
+﻿@model ResponseSession
+@{
+    ViewData["Title"] = "Результаты";
+    int i = 0;
+    string tdClass = "";
+    int count = 0, rightQuestionsAnsweredCount = 0;
+}
+@section Styles{
+    <style>
+        div.scroll {
+            background-color: whitesmoke;
+            margin: 4px, 4px;
+            padding: 4px;
+            width: 600px;
+            height: 310px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            text-align: justify;
+        }
+
+        table a {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        td > a {
+            color: white;
+        }
+
+        .scroll li {
+            padding: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 1px;
+            border: 1px solid black;
+        }
+
+        .results {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+}
+<a href="javascript:history.go(-1)">Назад</a>
+<br />
+<p class="results">Вы набрали: @(Model.Result) баллов. <br />Вы ответили верно на </p>
+<div style="width: 300px">
+    <table class="table table-sm table-bordered">
+        <tr>
+            @foreach (var q in Model.Questionnaire.QuestionnaireQuestions) {
+                count = 0;
+                foreach (var qa in q.QuestionnaireAnswers) {
+                    if (Model.Responses.Any(r => r.AnswerId == qa.AnswerId && r.QuestionnaireQuestionId == q.Id))
+                        count++;
+                }
+                tdClass = (count == q.QuestionnaireAnswers.Count &&
+                    Model.Responses.Where(r => r.QuestionnaireQuestionId == q.Id).Count() == count) ?
+                    "bg-success" : "bg-danger";
+                if (count == q.QuestionnaireAnswers.Count &&
+                    Model.Responses.Where(r => r.QuestionnaireQuestionId == q.Id).Count() == count)
+                    rightQuestionsAnsweredCount++;
+                <td class="@tdClass">
+                    <a href="#@q.Id">@(++i)</a>
+                </td>
+                @if (i % 10 == 0) {
+                @: </tr> <tr>
+                }
+            }
+            @{i = 0;}
+        </tr>
+    </table>
+</div>
+<div class="scroll">
+    @foreach (var questionnaireQuestion in Model.Questionnaire.QuestionnaireQuestions) {
+        <p id="@(questionnaireQuestion.Id)">
+            <h4>Вопрос № @(++i)</h4>
+            <h5><pre>@questionnaireQuestion.Question.Question_</pre></h5>
+            <ol>
+                @foreach (var answer in questionnaireQuestion.Question.Answers) {
+                    var _class = (questionnaireQuestion.QuestionnaireAnswers.
+                        Any(qa => qa.AnswerId == answer.Id)) ? "bg-success" : "";
+                    if (_class == "" && Model.Responses.
+                        Any(r => r.QuestionnaireQuestionId == questionnaireQuestion.Id &&
+                        r.AnswerId == answer.Id)) _class = "bg-danger";
+                    <li class="@_class">@answer.Answer_</li>
+                }
+            </ol>
+        </p>
+    }
+</div>
+@section Scripts{
+    <script>
+        $(function () {
+            $(".results").
+                append('@rightQuestionsAnsweredCount вопросов из @Model.Questionnaire.QuestionnaireQuestions.Count');
+        });
+    </script>
+}

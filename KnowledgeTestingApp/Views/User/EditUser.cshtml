@@ -1,0 +1,47 @@
+﻿@model User
+@{
+    ViewData["Title"] = "Редактирование пользователя";
+}
+@using (Html.BeginForm(actionName: "EditUser", controllerName: "User", FormMethod.Post)) {
+    <div class="form-row mb-3">
+        <div class="col">
+            @Html.HiddenFor(m => m.Id)
+            <label>Имя</label>
+            <input required type="text" asp-for="Firstname" class="form-control">
+        </div>
+        <div class="col">
+            <label>Фамилия</label>
+            <input required type="text" asp-for="Lastname" class="form-control">
+        </div>
+    </div>
+    <div class="form-row mb-3">
+        <div class="col">
+            <label>Никнейм</label>
+            <input required type="text" asp-for="Username" class="form-control">
+        </div>
+        <div class="col">
+            <label>Пароль</label>
+            <input required type="text" asp-for="Password" class="form-control">
+        </div>
+    </div>
+    <div class="form-row mb-3">
+        <div class="col">
+            <label>Дата рождения</label>
+            <input required type="date" asp-for="Birthday" class="form-control">
+        </div>
+        <div class="col">
+            <label>Почта</label>
+            <input required type="email" asp-for="Email" class="form-control">
+        </div>
+        <div class="col">
+            <label>Статус</label>
+            <select name="status" class="form-control" asp-items="ViewBag.Statuses"></select>
+        </div>
+    </div>
+    <button class="btn btn-success" type="submit">Сохранить</button>
+    @if (ViewBag.Message != null) {
+        <div class="alert alert-@(ViewBag.AlertType ?? "danger") mt-3" role="alert">
+            @ViewBag.Message
+        </div>
+    }
+}

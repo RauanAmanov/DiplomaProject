@@ -1,0 +1,76 @@
+﻿@model IEnumerable<User>;
+@{
+    ViewData["Title"] = "Пользователи";
+    int i = 0;
+}
+<a href="~/Admin/Index">Назад</a>
+<br />
+@using (Html.BeginForm(actionName: "AddUser", controllerName: "User", FormMethod.Post)) {
+    <div class="form-row mb-3">
+        <div class="col">
+            <label>Имя</label>
+            <input required type="text" name="Firstname" class="form-control">
+        </div>
+        <div class="col">
+            <label>Фамилия</label>
+            <input required type="text" name="Lastname" class="form-control">
+        </div>
+    </div>
+    <div class="form-row mb-3">
+        <div class="col">
+            <label>Никнейм</label>
+            <input required type="text" name="Username" class="form-control">
+        </div>
+        <div class="col">
+            <label>Пароль</label>
+            <input required type="password" name="Password" class="form-control">
+        </div>
+    </div>
+    <div class="form-row mb-3">
+        <div class="col">
+            <label>Дата рождения</label>
+            <input required type="date" name="Birthday" class="form-control">
+        </div>
+        <div class="col">
+            <label>Почта</label>
+            <input required type="email" name="Email" class="form-control">
+        </div>
+    </div>
+    <p>
+        <label>Статус</label><br />
+        <select class="form-control" name="status"
+                asp-items="Html.GetEnumSelectList<KnowledgeTestingApp.Models.Status>()"></select>
+    </p>
+    <button class="btn btn-success" type="submit">Добавить</button>
+    @if (ViewBag.Message != null) {
+        <div class="alert alert-@(ViewBag.AlertType ?? "danger") mt-3" role="alert">
+            @ViewBag.Message
+        </div>
+    }
+}
+<table class="table mt-5">
+    <tr>
+        <th>#</th>
+        <th>Никнейм</th>
+        <th>Пароль</th>
+        <th>Фамилия</th>
+        <th>Имя</th>
+        <th>Почта</th>
+        <th>Дата рождения</th>
+        <th>Администратор</th>
+        <td></td>
+    </tr>
+    @foreach (var m in Model) {
+        <tr>
+            <td>@(++i)</td>
+            <td>@m.Username</td>
+            <td>@m.Password</td>
+            <td>@m.Lastname</td>
+            <td>@m.Firstname</td>
+            <td>@m.Email</td>
+            <td>@m.Birthday.ToLongDateString()</td>
+            <td>@m.IsAdmin</td>
+            <td>@Html.ActionLink("Изменить", "EditUser", new { id = m.Id }) &nbsp;&nbsp;@Html.ActionLink("Удалить", "DeleteUser", new { id = m.Id })</td>
+        </tr>
+    }
+</table>

@@ -1,0 +1,25 @@
+﻿@model Author
+@{
+    ViewData["Title"] = (Model == null ? "Добавление" : "Изменение") + " автора";
+}
+<h3>Автор</h3>
+@Html.ActionLink("Назад", "Authors")
+<hr />
+@using (Html.BeginForm()) {
+    <p>
+        Фамилия
+        <br />
+        @Html.TextBoxFor(t => t.Lastname, new { @class = "form-control" })
+    </p>
+    <p>
+        Имя
+        <br />
+        @Html.TextBoxFor(t => t.Firstname, new { @class = "form-control" })
+    </p>
+    <p>
+        Отчество
+        <br />
+        @Html.TextBoxFor(t => t.Patronymic, new { @class = "form-control" })
+    </p>
+    <button class="btn btn-primary" type="submit">Отправить</button>
+}

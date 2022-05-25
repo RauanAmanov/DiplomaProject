@@ -1,0 +1,43 @@
+﻿@model User
+@{
+    ViewData["Title"] = "Регистрация";
+}
+<h2>Регистрация</h2>
+<hr />
+@Html.ValidationSummary(false, "", new { @class = "text-danger" })
+<div class="alert alert-success" style="display: @(ViewBag.Display ?? "none");">
+    <h4>Регистрация прошла успешно</h4>
+</div>
+<form method="post" asp-action="Register">
+    <div class="form-row mb-3">
+        <div class="col">
+            <label>Имя</label>
+            @Html.TextBoxFor(m => m.Firstname, new { @class = "form-control" })
+        </div>
+        <div class="col">
+            <label>Фамилия</label>
+            @Html.TextBoxFor(m => m.Lastname, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-row mb-3">
+        <div class="col">
+            <label>Никнейм</label>
+            @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
+        </div>
+        <div class="col">
+            <label>Пароль</label>
+            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        </div>
+    </div>
+    <div class="form-row mb-3">
+        <div class="col">
+            <label>Дата рождения</label>
+            <input required type="date" class="form-control" asp-for="Birthday" />
+        </div>
+        <div class="col">
+            <label>Почта</label>
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+        </div>
+    </div>
+    <button class="btn btn-success" type="submit">Зарегистрироваться</button>
+</form>

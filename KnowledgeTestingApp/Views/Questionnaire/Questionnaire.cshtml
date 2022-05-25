@@ -1,0 +1,17 @@
+﻿@model Questionnaire
+@{
+    ViewData["Title"] = "Тестирование";
+}
+@using (Html.BeginForm()) {
+    @Html.HiddenFor(m => m.Id)
+    <p>
+        Название <br />
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+    </p>
+    <p>
+        <input class="btn btn-success" type="submit" value="@(Model == null? "Добавить" : 
+        "Изменить")" />
+    </p>
+}
+<br />
+@Html.ActionLink("Отмена", "Questionnaires")

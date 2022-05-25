@@ -1,0 +1,39 @@
+﻿@model BooksQuestionnairesViewModel
+@section Styles {
+    <link rel="stylesheet" href="~/css/landingPage.css" />
+}
+@{
+    ViewData["Title"] = "Главная";
+    int bookCount = Model.Books.Count() > 3 ? 3 : Model.Books.Count();
+    int questCount = Model.Questionnaires.Count() > 3 ? 3 : Model.Questionnaires.Count();
+}
+<div class="text-center">
+    <h1 class="text-light">Сайт предназначенный для <br /><span>Проверки Знаний</span></h1>
+</div>
+<div class="content">
+    <div class="bg-light p-4 pl-5" style="margin-top: 300px; margin-bottom: 250px;">        
+        <h2>Тестирование</h2>
+        @for (int i = 0; i < questCount; ++i) {
+            <p>
+                @if (Model.Questionnaires[i].QuestionnaireQuestions.Count > 0) {
+                    @Html.ActionLink(Model.Questionnaires[i].Name, "QuestionnaireQuestion", "Response",
+                   new { id = Model.Questionnaires[i].QuestionnaireQuestions.FirstOrDefault()?.Id })
+                } else {
+                    @(Model.Questionnaires[i].Name)
+                }
+            </p>
+        }
+        @if (Model.Questionnaires.Count > 3) {
+            <p><a href="~/Questionnaire/Index">Ещё тестирования</a></p>
+        }
+        <h2>Книги</h2>
+        @for (int i = 0; i < bookCount; ++i) {
+            <p>
+                <a href="~/Book/DisplayBook?id=@Model.Books[i].Id">@Model.Books[i].Name</a>
+            </p>
+        }
+        @if (Model.Books.Count > 3) {
+            <p><a href="~/Book/Index">Ещё книги</a></p>
+        }
+    </div>
+</div>

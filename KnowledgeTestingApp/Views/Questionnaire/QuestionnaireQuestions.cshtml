@@ -1,0 +1,32 @@
+﻿@model Questionnaire
+@{
+    ViewData["Title"] = Model.Name;
+    int i = 0;
+}
+<h3>@Model.Name</h3>
+<br />
+@Html.ActionLink("Назад", "Questionnaires")
+<br />
+<br />
+@Html.ActionLink("Добавить вопрос", "QuestionnaireQuestion", new { questionnaireId = Model.Id })
+<br />
+@Html.ActionLink("Загрузить вопросы из текстового файла", "LoadQuestionsFromFile", new { questionnaireId = Model.Id })
+<table class="table mt-3">
+    <tr>
+        <th>#</th>
+        <th>Вопрос</th>
+        <th>Множественный выбор</th>
+        <th></th>
+    </tr>
+    @foreach (var m in Model.QuestionnaireQuestions) {
+        <tr>
+            <td>@(++i)</td>
+            <td>@m.Question.Question_</td>
+            <td>@m.IsMultiSelect</td>
+            <td>
+                @Html.ActionLink("Изменить", "QuestionnaireQuestion", new { id = m.Id }) &nbsp;&nbsp;&nbsp;
+                @Html.ActionLink("Удалить", "RemoveQuestionnaireQuestion", new { id = m.Id })
+            </td>
+        </tr>
+    }
+</table>

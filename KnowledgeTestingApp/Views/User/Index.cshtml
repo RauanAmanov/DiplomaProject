@@ -1,0 +1,69 @@
+﻿@model User
+@{
+    ViewData["Title"] = "Личный кабинет";
+    int i = 0;
+}
+<h3>Личный кабинет</h3>
+<table class="table-sm mb-3">
+    <tr>
+        <th>Никнейм</th>
+        <td>@Model.Username</td>
+    </tr>
+    <tr>
+        <th>Фамилия</th>
+        <td>@Model.Lastname</td>
+    </tr>
+    <tr>
+        <th>Имя</th>
+        <td>@Model.Firstname</td>
+    </tr>
+    <tr>
+        <th>Почтовый адрес</th>
+        <td>@Model.Email</td>
+    </tr>
+    <tr>
+        <th>Дата рождения</th>
+        <td>@Model.Birthday.ToLongDateString()</td>
+    </tr>
+</table>
+<h4 class="mt-5">Мои тестирования</h4>
+<table class="table table-light">
+    <tr>
+        <th>#</th>
+        <th>Тестирование</th>
+        <th>Начало</th>
+        <th>Окончание</th>
+        <th>Балл</th>
+        <th></th>
+    </tr>
+    @foreach (var t in Model.ResponseSessions) {
+        <tr>
+            <td>@(++i)</td>
+            <td>@t.Questionnaire.Name</td>
+            <td class="date">@(t.StartDate.Value.ToString("o")+ (t.StartDate.Value.ToString("o").EndsWith('Z')?"":"Z"))</td>
+            <td class="date">
+                @(t.FinishDate.HasValue? t.FinishDate.Value.ToString("o") + (t.FinishDate.Value.ToString("o").EndsWith('Z')?"":"Z") :
+            Html.ActionLink("Продолжить", "QuestionnaireQuestion", "Response",
+            new { id= t.Questionnaire.QuestionnaireQuestions.FirstOrDefault()?.Id }))
+            </td>
+            <td>@(t.Result.HasValue? $"{t.Result:0.0} / 100.00" : "Не завершено")</td>
+            <td>
+                @(t.Result.HasValue? Html.ActionLink("Проверить ответы", "Result", "Response",
+                new { id = t.Id }) : string.Empty)
+            </td>
+        </tr>
+    }
+</table>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $(".date").each(function () {
+                if (this.innerText !== 'Продолжить') {
+                    var utcString = this.innerText;
+                    var date = new Date(utcString);
+                    this.innerText = date.toLocaleString();
+                }
+            });
+        });
+    </script>
+}

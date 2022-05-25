@@ -1,0 +1,31 @@
+﻿body {
+    background-image: url('../images/GettyImages-577674005_492115_zfpgiw.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    min-width: 100%;
+}
+
+    body > .container {
+        padding: 0;
+    }
+
+        body > .container, body > .container .text-center {
+            min-width: 100%;
+        }
+
+            body > .container .text-center {
+                margin: 0px auto;
+            }
+
+.text-center {
+    font-family: cursive;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-bottom: 2px solid indianred;
+    border-top: 2px solid indianred;
+}
+
+    .text-center > h1 > span {
+        color: gold;
+    }

@@ -1,0 +1,146 @@
+﻿@model List<ResponseSession>
+@{
+    ViewData["Title"] = "Результаты пользователей";
+    int i = 0;
+}
+
+<fieldset class="border p-2">
+    <legend class="w-auto">Фильтр</legend>
+    <form method="POST">
+        <div class="form-row mb-3">
+            <div class="col">
+                <label><b>Тестирование</b></label>
+                @Html.DropDownList("questionnaireId", ViewBag.Questionnaires as SelectList, new { @id = "questionnaireId", @class = "form-control" })
+            </div>
+            <div class="col">
+                <label><b>Пользователь</b></label>
+                @Html.DropDownList("userId", ViewBag.Users as SelectList, new { @id = "userId", @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-row mb-3">
+            <div class="col">
+                <label><b>Оценка с:</b></label>
+                <input type="number" id="fromResult" class="form-control" />
+            </div>
+            <div class="col">
+                <label><b>по:</b></label>
+                <input type="number" id="toResult" class="form-control" />
+            </div>
+        </div>
+        <div class="form-row mb-3">
+            <div class="col">
+                <label><b>По дате начала с</b></label>
+                <input type="date" id="fromStartDate" class="form-control" />
+            </div>
+            <div class="col">
+                <label><b>по:</b></label>
+                <input type="date" id="toStartDate" class="form-control" />
+            </div>
+        </div>
+        <div class="form-row mb-3">
+            <div class="col">
+                <label><b>По дате завершения с</b></label>
+                <input type="date" id="fromFinishDate" class="form-control" />
+            </div>
+            <div class="col">
+                <label><b>по:</b></label>
+                <input type="date" id="toFinishDate" class="form-control" />
+            </div>
+        </div>
+        <h3>Сортировать по</h3>
+        <p>
+            <input type="radio" class="sort_radio" name="orderBy" value="result" />Оценкам
+            <br />
+            <input type="radio" class="sort_radio" name="orderBy" value="questionnaire" />Тестированию
+            <br />
+            <input type="radio" class="sort_radio" name="orderBy" value="user" />Пользователям
+        </p>
+        <input type="submit" value="Поиск" />
+    </form>
+    <br />
+    <a href="~/Response/ResponseSessions" class="btn btn-primary">Сброс фильтров</a>
+
+</fieldset>
+<table class="table table-light">
+    <thead class="thead-dark">
+        <tr>
+            <th>#</th>
+            <th>Пользователь</th>
+            <th>Тестирование</th>
+            <th>Результат</th>
+            <th>Дата начала</th>
+            <th>Дата завершения</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="results">
+        @foreach (var item in Model) {
+            <tr>
+                <td>@(++i)</td>
+                <td>@item.User.Username</td>
+                <td>@item.Questionnaire.Name</td>
+                <td>@item.Result / 100.00</td>
+                <td class="date">@(item.StartDate?.ToString("o") + (item.StartDate.Value.ToString("o").EndsWith('Z')?"":"Z"))</td>
+                <td class="date">@(item.FinishDate!= null ? item.FinishDate.Value.ToString("o") + (item.FinishDate.Value.ToString("o").EndsWith('Z') ? "" : "Z") : "Не завершено")</td>
+                <td><a href="~/Response/Result?id=@item.Id">Посмотреть ответы</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            console.log('hello, world');
+            $(".date").each(function () {
+                if (this.innerText !== 'Не завершено') {
+                    var utcString = this.innerText;
+                    var date = new Date(utcString);
+                    this.innerText = date.toLocaleString();
+                }
+            });
+
+            var objs = @Html.Raw(Json.Serialize(Model.Select(m=>new { Id = m.Id, User = m.User, StartDate = m.StartDate?.ToString("o") + (m.StartDate.Value.ToString("o").EndsWith('Z') ? "" : "Z"), FinishDate = m.FinishDate.HasValue ? m.FinishDate?.ToString("o") + (m.FinishDate.Value.ToString("o").EndsWith('Z') ? "" : "Z") :  "Не завершено", Result = m.Result, Questionnaire= m.Questionnaire })));
+
+            $("form").submit(function (event){
+                $.ajax({
+                     type: "GET",
+                     url: "@Url.Action("JsonSearch")",
+                     data: {
+                         questionnaireId: $("#questionnaireId").val(),
+                         userId: $("#userId").val(),
+                         fromResult: $("#fromResult").val(),
+                         toResult: $("#toResult").val(),
+                         fromStartDate: $("#fromStartDate").val(),
+                         toStartDate: $("#toStartDate").val(),
+                         fromFinishDate: $("#fromFinishDate").val(),
+                         toFinishDate: $("#toFinishDate").val(),
+                         orderBy: $(".sort_radio:checked").val(),
+                     },
+                    dataType: "json",
+                    success: function (data) {
+                        var results = $("#results");
+                        results.empty();
+
+                        for (var i = 0; i < data.length; ++i) {
+                            var startDate = new Date(objs[data[i]].startDate).toLocaleString();
+                            var finishDate = objs[data[i]].finishDate !== 'Не завершено' ? new Date(objs[data[i]].finishDate).toLocaleString() : objs[data[i]].finishDate;
+                            var result = objs[data[i]].result !== null ? parseFloat(objs[data[i]].result + '').toFixed(2) : "";
+
+                            results.append('<tr><td>' + (i + 1) + '</td><td>' + objs[data[i]].user.username + '</td><td>' +
+                                objs[data[i]].questionnaire.name + '</td><td>' + result + '/ 100.00</td><td>' + startDate + '</td><td>' + finishDate +
+                                '</td><td>' + '<a href="@Url.Content("~/Response/Result?id=")' + objs[data[i]].id + '">Посмотреть ответы</a></td></tr>');
+                        }
+                        $(".date").each(function () {
+                            if (this.innerText !== 'Не завершено') {
+                                var utcString = this.innerText;
+                                var date = new Date(utcString);
+                                this.innerText = date.toLocaleString();
+                            }
+                        });
+                    }
+                });
+                event.preventDefault();
+            });
+        });
+    </script>
+}    

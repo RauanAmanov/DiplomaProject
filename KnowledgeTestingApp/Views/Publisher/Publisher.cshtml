@@ -1,0 +1,19 @@
+﻿@model Publisher
+@{
+    ViewData["Title"] = "Издательство";
+}
+<h3>@(Model == null || (Model != null && Model.Id == 0) ? "Добавление" : "Изменение") </h3>
+<hr />
+<a href="~/Publisher/Publishers">Назад</a>
+<br />
+@using (Html.BeginForm()) {
+    Html.ValidationSummary(false, "", new { @class = "text-danger" });
+    Html.HiddenFor(m => m.Id);
+    <p>
+        Название<br />
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+    </p>
+    <br />
+    <button class="btn btn-primary" type="submit">@(Model == null || (Model != null && Model.Id == 0) ? "Добавить" :
+        "Изменить")</button>
+}

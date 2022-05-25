@@ -1,0 +1,26 @@
+﻿@model List<Book>
+@{
+    ViewData["Title"] = "Книги";
+    int i = 0;
+}
+<h3>Книги</h3>
+<table class="table table-sm">
+    <tr>
+        <th>#</th>
+        <th>Название</th>
+        <th>Автор</th>
+        <th>Издательство</th>
+        <th>Обложка</th>
+        <th></th>
+    </tr>
+    @foreach (var m in Model) {
+        <tr>
+            <td>@(++i)</td>
+            <td>@m.Name</td>
+            <td>@m.Author.Fullname</td>
+            <td>@m.Publisher.Name</td>
+            <td><img style="width: 120px;" src="data:image/jpeg;base64, @Convert.ToBase64String(m.Image)" /></td>
+            <td><a href="@Url.Content(m.Path)">Читать</a></td>
+        </tr>
+    }
+</table>
