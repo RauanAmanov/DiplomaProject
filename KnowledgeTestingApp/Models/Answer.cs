@@ -12,8 +12,6 @@ namespace KnowledgeTestingApp.Models {
     [Column("Answer")]
     public string Answer_ { get; set; }
     
-    public string PicturePath { get; set; }
-
     public int QuestionId { get; set; }
     public Question Question { get; set; }
 
