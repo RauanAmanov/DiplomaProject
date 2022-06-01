@@ -28,12 +28,15 @@ namespace KnowledgeTestingApp.Controllers {
     }
 
     [HttpPost]
-    public IActionResult Questionnaire(Questionnaire questionnaire) {
+    public IActionResult Questionnaire(Questionnaire questionnaire, IFormFile image) {
       if (questionnaire.Id == 0) {
+        questionnaire.Path = FileManager.UploadFileToServer(image, "questionnaires", _env.WebRootPath);
         db.Questionnaires.Add(questionnaire);
       } else {
         var newQuestionnaire = db.Questionnaires.Find(questionnaire.Id);
         newQuestionnaire.Name = questionnaire.Name;
+        if (image != null)
+          newQuestionnaire.Path = FileManager.UploadFileToServer(image, "questionnaires", _env.WebRootPath);
         db.Entry(newQuestionnaire).State = EntityState.Modified;
       }
       db.SaveChanges();
@@ -123,10 +126,12 @@ namespace KnowledgeTestingApp.Controllers {
 
     [HttpPost]
     public IActionResult QuestionnaireQuestion(QuestionnaireQuestion questionnaireQuestion,
-      List<QuestionnaireAnswerModel> options) {
+      List<QuestionnaireAnswerModel> options, IFormFile image) {
       if (questionnaireQuestion.Id != 0) {
         var oldQuestionnaireQuestion = db.QuestionnaireQuestions.Find(questionnaireQuestion.Id);
         oldQuestionnaireQuestion.IsMultiSelect = questionnaireQuestion.IsMultiSelect;
+        if (image != null)
+          oldQuestionnaireQuestion.Image = FileManager.FileToByteArray(image);
         var question = db.Questions.Find(oldQuestionnaireQuestion.QuestionId);
         question.Question_ = questionnaireQuestion.Question.Question_;
         List<int> idsToKeep = new List<int>();
@@ -135,6 +140,8 @@ namespace KnowledgeTestingApp.Controllers {
             Answer answer;
             answer = db.Answers.Find(o.Answer.Id);
             answer.Answer_ = o.Answer.Answer_;
+            if (o.Image != null)
+              answer.Image = FileManager.FileToByteArray(o.Image);
             if (!o.IsCorrect)
               db.QuestionnaireAnswers.
               RemoveRange(db.QuestionnaireAnswers.
@@ -149,6 +156,8 @@ namespace KnowledgeTestingApp.Controllers {
             Answer answer = new Answer();
             answer.QuestionId = question.Id;
             answer.Answer_ = o.Answer.Answer_;
+            if (o.Image != null)
+              answer.Image = FileManager.FileToByteArray(o.Image);
             o.Answer.QuestionId = question.Id;
             db.Answers.Add(answer);
             db.SaveChanges();
@@ -170,10 +179,14 @@ namespace KnowledgeTestingApp.Controllers {
         db.SaveChanges();
         questionnaireQuestion.QuestionId = question.Id;
         questionnaireQuestion.Question = null;
+        if (image != null)
+          questionnaireQuestion.Image = FileManager.FileToByteArray(image);
         db.QuestionnaireQuestions.Add(questionnaireQuestion);
         db.SaveChanges();
         options.ToList().ForEach(o => {
           Answer answer = new Answer() { Answer_ = o.Answer.Answer_, QuestionId = question.Id };
+          if (o.Image != null)
+            answer.Image = FileManager.FileToByteArray(o.Image);
           db.Answers.Add(answer);
           db.SaveChanges();
           if (o.IsCorrect)
@@ -190,7 +203,7 @@ namespace KnowledgeTestingApp.Controllers {
       var answers = db.QuestionnaireAnswers.
         Where(qa => qa.QuestionnaireQuestionId == questionnaireQuestion.Id).ToList();
       db.Responses.RemoveRange(responses);
-      db.QuestionnaireAnswers.RemoveRange(answers);
+      db.QuestionnaireAnswers.RemoveRange(answers);            
       db.QuestionnaireQuestions.Remove(questionnaireQuestion);
       db.SaveChanges();
       return RedirectToAction("QuestionnaireQuestions",
@@ -203,10 +216,7 @@ namespace KnowledgeTestingApp.Controllers {
         var questionnareAnswers = db.QuestionnaireAnswers.
           Where(qa => qa.QuestionnaireQuestionId == questionnaireQuestion.Id).ToList();
         var options = db.Answers.Where(a => a.QuestionId == questionnaireQuestion.QuestionId).
-          ToList().Select(a => new QuestionnaireAnswerModel() {
-            Answer = a, IsCorrect = questionnareAnswers.Any(qa => qa.AnswerId == a.Id)
-          }).
-            ToList();
+          ToList();
 
         ViewBag.Options = options;
         return View(questionnaireQuestion);
@@ -240,6 +250,8 @@ namespace KnowledgeTestingApp.Controllers {
       db.ResponseSessions.RemoveRange(responseSessions);
       db.QuestionnaireAnswers.RemoveRange(questionnaireAnswers);
       db.QuestionnaireQuestions.RemoveRange(questionnaireQuestions);
+      string path = Path.Combine(_env.WebRootPath, new string(questionnaire.Path.Skip(1).ToArray()));
+      FileManager.RemoveFileFromServer(path);
       db.Questionnaires.Remove(questionnaire);
       db.SaveChanges();
       return RedirectToAction("Questionnaires");

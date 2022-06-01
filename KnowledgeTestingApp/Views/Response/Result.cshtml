@@ -74,6 +74,9 @@
     @foreach (var questionnaireQuestion in Model.Questionnaire.QuestionnaireQuestions) {
         <p id="@(questionnaireQuestion.Id)">
             <h4>Вопрос № @(++i)</h4>
+            @if (questionnaireQuestion.Image != null) {
+                <img src="data:image/jpeg;base64, @Convert.ToBase64String(questionnaireQuestion.Image)" style="width: 320px;" />
+            }
             <h5><pre>@questionnaireQuestion.Question.Question_</pre></h5>
             <ol>
                 @foreach (var answer in questionnaireQuestion.Question.Answers) {
@@ -82,7 +85,14 @@
                     if (_class == "" && Model.Responses.
                         Any(r => r.QuestionnaireQuestionId == questionnaireQuestion.Id &&
                         r.AnswerId == answer.Id)) _class = "bg-danger";
-                    <li class="@_class">@answer.Answer_</li>
+                    <li class="@_class">
+                        @if (answer.Image != null) {
+                            <img src="data:image/jpeg;base64, @Convert.ToBase64String(answer.Image)" style="width: 280px;" />                            
+                        }
+                        <p>
+                            @answer.Answer_
+                        </p>
+                    </li>
                 }
             </ol>
         </p>

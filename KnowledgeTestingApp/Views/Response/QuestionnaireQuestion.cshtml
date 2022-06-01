@@ -13,60 +13,66 @@
         }
     </style>
 }
+<div class="content1 d-flex justify-content-between">
+     <div style="width: 300px">
+         <table class="table table-sm table-bordered">
+             <tr>
+                 @foreach (var a in Model.QuestionnaireQuestions) {
+                     <td @if (Model.Responses.Any(r => r.QuestionnaireQuestionId == a.Id)) { @: bgcolor=#f3e5ab
+                         }>
+                         <a href="~/Response/QuestionnaireQuestion?id=@a.Id">@(++i)</a>
+                     </td>
+                     @if (a.Id == Model.QuestionnaireQuestion.Id) j = i;
+                     @if (i % 10 == 0) {
+                         @: </tr> <tr>
+                     }
+                 }
+             </tr>
+         </table>
+     </div>
+     <div id="demo"></div>
+</div>
+
 @using (Html.BeginForm()) {
     @Html.HiddenFor(m => m.QuestionnaireQuestion.Id)
-    <div class="content1 d-flex justify-content-between">
-        <div style="width: 300px">
-            <table class="table table-sm table-bordered">
-                <tr>
-                    @foreach (var a in Model.QuestionnaireQuestions) {
-                        <td @if (Model.Responses.Any(r => r.QuestionnaireQuestionId == a.Id)) { @: bgcolor=#f3e5ab
-                            }>
-                            <a href="~/Response/QuestionnaireQuestion?id=@a.Id">@(++i)</a>
-                        </td>
-                        @if (a.Id == Model.QuestionnaireQuestion.Id) j = i;
-                        @if (i % 10 == 0) {
-                        @: </tr> <tr>
-                        }
-                    }
-                </tr>
-            </table>
-        </div>
-        <div id="demo"></div>
-    </div>
-
     <h5>Вопрос № @j</h5>
+    @if (Model.QuestionnaireQuestion.Image != null) {
+        <img src="data:image/jpeg;base64, @Convert.ToBase64String(Model.QuestionnaireQuestion.Image)" style="width: 320px;" />
+    }
     <h5><pre>@Model.QuestionnaireQuestion.Question.Question_</pre></h5>
-    @Html.HiddenFor(m => m.NextId);
-    if (Model.QuestionnaireQuestion.IsMultiSelect) {
-        foreach (var m in Model.Answers) {
-            <div class="option">
-                <p>
-                    @Html.CheckBox($"ResponseHelpers[{k}].IsChecked", Model.ResponseHelpers.
-                   Any(r => r.Response.AnswerId == m.Id), new { @id = "" })
-                    @Html.Hidden($"ResponseHelpers[{k}].Response.AnswerId", m.Id)
-                    @Html.Hidden($"ResponseHelpers[{k}].Response.Id", Model.ResponseHelpers.
-                   FirstOrDefault(r => r.Response.AnswerId == m.Id)?.Response.Id ?? 0)
-                    &nbsp; @m.Answer_
-                </p>
-            </div>
-            k++;
-        }
-    } else {
-        foreach (var m in Model.Answers) {
-            <div class="option">
-                <p>
-                    <input required type="radio" name="ResponseHelpers[0].Response.AnswerId" value="@m.Id" @(Model.ResponseHelpers.Any(rh => rh.Response.AnswerId == m.Id) ? "checked" : "") />
-                    &nbsp; @m.Answer_
-                    @Html.Hidden($"ResponseHelpers[0].Response.Id", Model.ResponseHelpers.FirstOrDefault(r => r.Response.AnswerId == m.Id)?.Response.Id ?? 0)
-                </p>
-            </div>
-        }
+    @Html.HiddenFor(m => m.NextId)
+    
+    foreach (var m in Model.Answers) {
+        <div class="option">            
+           <p>
+               @if (Model.QuestionnaireQuestion.IsMultiSelect) {
+                  @Html.CheckBox($"ResponseHelpers[{k}].IsChecked", Model.ResponseHelpers.
+                  Any(r => r.Response.AnswerId == m.Id), new { @id = "" })
+                  @Html.Hidden($"ResponseHelpers[{k}].Response.AnswerId", m.Id)
+                  @Html.Hidden($"ResponseHelpers[{k}].Response.Id", Model.ResponseHelpers.
+                  FirstOrDefault(r => r.Response.AnswerId == m.Id)?.Response.Id ?? 0)                  
+                  @(k++)
+                }else {
+                    <input required type="radio" name="ResponseHelpers[0].Response.AnswerId" value="@m.Id" @(Model.ResponseHelpers.Any(rh => rh.Response.AnswerId == m.Id) ? "checked" : "") />                  
+                    @Html.Hidden($"ResponseHelpers[0].Response.Id", Model.ResponseHelpers.
+                    FirstOrDefault(r => r.Response.AnswerId == m.Id)?.Response.Id ?? 0)
+                }
+                @if (m.Image != null) {
+                    <img src="data:image/jpeg;base64, @Convert.ToBase64String(m.Image)" style="width: 270px;" />
+                    <br />
+                    <br />
+                    @: &nbsp;&nbsp; 
+                }
+                @m.Answer_
+            </p>
+
+        </div>
     }
     <a href="~/Response/QuestionnaireQuestion?id=@Model.PreviousId" class="btn btn-danger@(!Model.PreviousId.HasValue?" disabled":"")">Назад</a>@:&nbsp; &nbsp;
     <button type="submit" class="btn btn-primary">Сохранить</button> @: &nbsp; &nbsp;
     <a href="~/Response/QuestionnaireQuestion?id=@Model.NextId" class="btn btn-success@(!Model.NextId.HasValue?" disabled":"")">Вперёд</a>
 }
+
 @section Scripts{
     <script>
         @{

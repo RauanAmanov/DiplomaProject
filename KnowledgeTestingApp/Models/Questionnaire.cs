@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 namespace KnowledgeTestingApp.Models {
   public class Questionnaire {
     public int Id { get; set; }
-    public string Name { get; set; }
 
-    [JsonIgnore]
+    public string Name { get; set; }
+    public string Path { get; set; }
+
     public List<QuestionnaireQuestion> QuestionnaireQuestions { get; set; }
   }
 }

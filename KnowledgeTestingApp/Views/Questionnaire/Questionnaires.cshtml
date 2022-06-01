@@ -12,12 +12,14 @@
     <tr>
         <th>#</th>
         <th>Название</th>
+        <th>Изображение</th>
         <th></th>
     </tr>
     @foreach (var m in Model) {
         <tr>
             <td>@(++i)</td>
             <td><a href="~/Questionnaire/QuestionnaireQuestions?id=@m.Id">@m.Name</a></td>
+            <td><img src="@Url.Content(m.Path)" style="width: 100px;" /></td>
             <td>
                 @Html.ActionLink("Изменить", "Questionnaire", new { id = m.Id }) &nbsp;&nbsp;&nbsp;
                 @Html.ActionLink("Удалить", "RemoveQuestionnaire", new { id = m.Id })

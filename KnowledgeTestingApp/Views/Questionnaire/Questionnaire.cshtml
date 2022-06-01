@@ -2,14 +2,23 @@
 @{
     ViewData["Title"] = "Тестирование";
 }
-@using (Html.BeginForm()) {
+@using (Html.BeginForm("Questionnaire", "Questionnaire", FormMethod.Post, new { @enctype = "multipart/form-data" })) {
     @Html.HiddenFor(m => m.Id)
+    @if (Model != null) {
+        <p>
+            <img src="@Url.Content(Model.Path)" style="width: 100px" />
+        </p>
+    }
     <p>
         Название <br />
         @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
     </p>
     <p>
-        <input class="btn btn-success" type="submit" value="@(Model == null? "Добавить" : 
+        Изображение <br />
+        <input type="file" name="image" />
+    </p>
+    <p>
+        <input class="btn btn-success" type="submit" value="@(Model == null? "Добавить" :
         "Изменить")" />
     </p>
 }

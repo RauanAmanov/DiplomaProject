@@ -8,6 +8,7 @@ namespace KnowledgeTestingApp.ViewModels {
   public class QuestionnaireAnswerModel {
     public Answer Answer { get; set; }
     public bool IsCorrect { get; set; }
-    
+    public Microsoft.AspNetCore.Http.IFormFile Image { get; set; }
+
   }
 }

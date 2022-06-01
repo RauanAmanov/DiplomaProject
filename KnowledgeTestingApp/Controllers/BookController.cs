@@ -14,6 +14,33 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace KnowledgeTestingApp.Controllers {
+  public static class FileManager {
+    public static string UploadFileToServer(IFormFile file, string folderName, string serverDirPath) {
+      string uploadFolderPath = serverDirPath + "/uploads/";
+      if (!Directory.Exists(uploadFolderPath))
+        Directory.CreateDirectory(uploadFolderPath);
+      uploadFolderPath = Path.Combine(uploadFolderPath, folderName);
+      if (!Directory.Exists(uploadFolderPath))
+        Directory.CreateDirectory(uploadFolderPath);
+      string path = string.Format("/uploads/{0}/{1}", folderName, file.FileName);
+      using (var fs = new FileStream(Path.Combine(uploadFolderPath, file.FileName), FileMode.Create))
+        file.CopyTo(fs);
+      return path;
+    }
+
+    public static void RemoveFileFromServer(string path) {
+      if (System.IO.File.Exists(path))
+        System.IO.File.Delete(path);
+    }
+
+    public static byte[] FileToByteArray(IFormFile file) {
+      byte[] result = null;
+      using (BinaryReader br = new BinaryReader(file.OpenReadStream()))
+        result = br.ReadBytes((int)file.Length);
+      return result;
+    }
+  }
+
   public class BookController : Controller {
     Context db;
     IWebHostEnvironment _env;
@@ -27,22 +54,7 @@ namespace KnowledgeTestingApp.Controllers {
       return View(db.Books.Include(b => b.Author).Include(b => b.Publisher).ToList());
     }
 
-    public string UploadFileToServer(IFormFile file) {
-      string path = string.Format("/uploads/{0}", file.FileName);
-      string uploadPath = _env.WebRootPath + "/uploads/";
-      if (!Directory.Exists(uploadPath))
-        Directory.CreateDirectory(uploadPath);
-      using (var fs = new FileStream(Path.Combine(uploadPath, file.FileName), FileMode.Create))
-        file.CopyTo(fs);
-      return path;
-    }
 
-    public byte[] FileToByteArray(IFormFile file) {
-      byte[] result = null;
-      using (BinaryReader br = new BinaryReader(file.OpenReadStream()))
-        result = br.ReadBytes((int)file.Length);
-      return result;
-    }
 
     [HttpPost]
     [DisableRequestSizeLimit]
@@ -58,17 +70,17 @@ namespace KnowledgeTestingApp.Controllers {
           book.PublisherId = bvm.PublisherId;
           if (bvm.File != null) {
             System.IO.File.Delete(_env.WebRootPath + book.Path);
-            book.Path = UploadFileToServer(bvm.File);
+            book.Path = FileManager.UploadFileToServer(bvm.File, "books", _env.WebRootPath);
           }
           if (bvm.Image != null)
-            book.Image = FileToByteArray(bvm.Image);
+            book.Image = FileManager.FileToByteArray(bvm.Image);
           db.SaveChanges();
         }//add 
         else {
           Book book = new Book() {
             Name = bvm.Name,
-            Path = UploadFileToServer(bvm.File),
-            Image = FileToByteArray(bvm.Image),
+            Path = FileManager.UploadFileToServer(bvm.File, "books", _env.WebRootPath),
+            Image = FileManager.FileToByteArray(bvm.Image),
             AuthorId = bvm.AuthorId,
             PublisherId = bvm.PublisherId
           };
@@ -107,7 +119,8 @@ namespace KnowledgeTestingApp.Controllers {
 
     public IActionResult RemoveBook(int? id) {
       Book book = db.Books.Single(b => b.Id == id);
-      System.IO.File.Delete(book.Path);
+      string path = Path.Combine(_env.WebRootPath, new string(book.Path.Skip(1).ToArray()));
+      FileManager.RemoveFileFromServer(path);
       db.Books.Remove(book);
       db.SaveChanges();
       return RedirectToAction("Books");

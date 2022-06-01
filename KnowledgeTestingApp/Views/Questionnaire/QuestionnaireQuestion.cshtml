@@ -5,9 +5,17 @@
 }
 <h3>@(Model == null ? "Новый вопрос" : "Редактирование вопроса")</h3>
 @Html.ActionLink("Назад", "QuestionnaireQuestions", new { id = Model.QuestionnaireId })
-@using (Html.BeginForm()) {
+@using (Html.BeginForm("QuestionnaireQuestion", "Questionnaire", FormMethod.Post, new { @enctype = "multipart/form-data" })) {
     @Html.HiddenFor(m => m.Id)
     @Html.HiddenFor(m => m.QuestionnaireId)
+    <p>
+        @if (Model.Image != null) {
+            <img style="width: 360px;" src="data:image/jpeg;base64, @Convert.ToBase64String(Model.Image)" alt="@Model.Question.Question_" />
+            <br />
+        }
+        Изображение <br />
+        <input name="image" type="file" />
+    </p>
     <p>
         Текст вопроса
         @Html.TextAreaFor(m => m.Question.Question_, new { @class = "form-control", @rows = 7 })
@@ -15,18 +23,26 @@
     <p>
         Множественный выбор <br />
         @Html.CheckBoxFor(m => m.IsMultiSelect)
-    </p><div class="answersBlock">
+    </p>
+    <div class="answersBlock">
         @if (ViewBag.Options != null) {
             @foreach (var o in ViewBag.Options) {
                 <div class="option">
                     <h4>Вариант ответа № @(i+1)</h4>
-                    <input type="hidden" name="options[@(i)].Answer.Id" value="@o.Answer.Id" />
+                    <input type="hidden" name="options[@(i)].Answer.Id" value="@o.Id" />
                     <p>
-                        Текст ответа<br />
-                        <textarea rows='7' name="options[@(i)].Answer.Answer_" class="form-control">@o.Answer.Answer_</textarea>
+                        @if (o.Image != null) {
+                            <img style="width: 360px;" src="data:image/jpeg;base64, @Convert.ToBase64String(o.Image)" />
+                        }
+                        Изображение <br />
+                        <input name="options[0].Image" type="file" />
                     </p>
                     <p>
-                        Правильный ответ &nbsp;&nbsp; @Html.CheckBox($"options[{i++}].IsCorrect", ((KnowledgeTestingApp.ViewModels.QuestionnaireAnswerModel)o).IsCorrect, new { @id = "" })
+                        Текст ответа<br />
+                        <textarea rows='7' name="options[@(i)].Answer.Answer_" class="form-control">@o.Answer_</textarea>
+                    </p>
+                    <p>
+                        Правильный ответ &nbsp;&nbsp; @Html.CheckBox($"options[{i++}].IsCorrect", Model.QuestionnaireAnswers.Any(qa=>qa.AnswerId==o.Id), new { @id = "" })
                     </p>
                 </div>
             }
@@ -34,6 +50,10 @@
         } else {
             <div class="option">
                 <h4>Вариант ответа № 1</h4>
+                <p>
+                    Изображение <br />
+                    <input name="options[0].Image" type="file" />
+                </p>
                 <p>
                     Текст ответа<br />
                     <textarea rows='7' class="form-control" name="options[0].Answer.Answer_"></textarea>
@@ -52,18 +72,19 @@
 }
 @section Scripts {
     <script>
-        $(function () {
+        $(function() {
             var i = @i;
             $("form>.input[type='checkbox']").remove();
-            $(".addLink").click(function () {
+            $(".addLink").click(function() {
                 i++;
                 var newElement = "<div class='option'><h4>Вариант ответа № " + (i + 1)
-                    + "</h4><p>Текст ответа<br/><textarea rows='7' class='form-control' name='options[" + i
-                    + "].Answer.Answer_'></textarea></p><p>Правильный ответ &nbsp;&nbsp; <input name='options[" + i + "].IsCorrect' type='checkbox' value='true'></p></div>";
+                    + "</h4><p>Изображение <br /><input name='options[" + i + "].Image' type='file' /></p><p>Текст ответа<br/><textarea rows='7' class='form-control' name='options["
+                    + i + "].Answer.Answer_'></textarea></p><p>Правильный ответ &nbsp;&nbsp; <input name='options[" + i +
+                    "].IsCorrect' type='checkbox' value='true'></p></div>";
 
                 $(".answersBlock").append(newElement);
             });
-            $(".removeLink").click(function () {
+            $(".removeLink").click(function() {
                 if (i > 0) {
                     var selector = ".answersBlock > div:has(textarea[name='options[" + i + "].Answer.Answer_'])";
                     $(selector).remove();

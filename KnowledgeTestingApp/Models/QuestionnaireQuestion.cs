@@ -15,6 +15,8 @@ namespace KnowledgeTestingApp.Models {
     public int QuestionId { get; set; }
     public Question Question { get; set; }
 
+    public byte[] Image { get; set; }
+
     public bool IsMultiSelect { get; set; }
     
     public List<QuestionnaireAnswer> QuestionnaireAnswers { get; set; }
