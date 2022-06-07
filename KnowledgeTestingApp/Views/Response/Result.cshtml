@@ -43,7 +43,9 @@
 }
 <a href="javascript:history.go(-1)">Назад</a>
 <br />
-<p class="results">Вы набрали: @(Model.Result) баллов. <br />Вы ответили верно на </p>
+<h3>Пользователь: @($"{Model.User.Lastname} {Model.User.Firstname}")</h3>
+<h3>Тестирование: @Model.Questionnaire.Name</h3>
+<p class="results">Результат: @(Model.Result) баллов. <br />Правильных ответов </p>
 <div style="width: 300px">
     <table class="table table-sm table-bordered">
         <tr>

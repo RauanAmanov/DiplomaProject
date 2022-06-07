@@ -139,17 +139,18 @@ namespace KnowledgeTestingApp.Controllers
     {
       if (id.GetValueOrDefault() == 0)
         return NotFound();
-      ResponseSession rs = db.ResponseSessions.Include(rs => rs.Responses).
-        Include(rs => rs.Questionnaire).
-        ThenInclude(q => q.QuestionnaireQuestions).
-        SingleOrDefault(rs => rs.Id == id);
-      rs.Questionnaire.QuestionnaireQuestions.ForEach(qq => 
+      
+      ResponseSession responseSession = db.ResponseSessions.Include(rs => rs.Responses).
+        Include(rs => rs.User).Include(rs => rs.Questionnaire).ThenInclude(q => q.QuestionnaireQuestions).SingleOrDefault(rs => rs.Id == id);
+      
+      responseSession.Questionnaire.QuestionnaireQuestions.ForEach(qq => 
       {
         qq.Question = db.Questions.Include(q => q.Answers).Single(q => q.Id == qq.QuestionId);
         qq.QuestionnaireAnswers = db.QuestionnaireAnswers.
         Include(qa => qa.Answer).Where(qa => qa.QuestionnaireQuestionId == qq.Id).ToList();
       });
-      return View(rs);
+
+      return View(responseSession);
     }
 
     public IActionResult FinishQuestionnaire(int? id) 

@@ -50,8 +50,9 @@
                   Any(r => r.Response.AnswerId == m.Id), new { @id = "" })
                   @Html.Hidden($"ResponseHelpers[{k}].Response.AnswerId", m.Id)
                   @Html.Hidden($"ResponseHelpers[{k}].Response.Id", Model.ResponseHelpers.
-                  FirstOrDefault(r => r.Response.AnswerId == m.Id)?.Response.Id ?? 0)                  
-                  @(k++)
+                  FirstOrDefault(r => r.Response.AnswerId == m.Id)?.Response.Id ?? 0)
+                  
+                  k++;
                 }else {
                     <input required type="radio" name="ResponseHelpers[0].Response.AnswerId" value="@m.Id" @(Model.ResponseHelpers.Any(rh => rh.Response.AnswerId == m.Id) ? "checked" : "") />                  
                     @Html.Hidden($"ResponseHelpers[0].Response.Id", Model.ResponseHelpers.
@@ -69,7 +70,7 @@
         </div>
     }
     <a href="~/Response/QuestionnaireQuestion?id=@Model.PreviousId" class="btn btn-danger@(!Model.PreviousId.HasValue?" disabled":"")">Назад</a>@:&nbsp; &nbsp;
-    <button type="submit" class="btn btn-primary">Сохранить</button> @: &nbsp; &nbsp;
+    <button id="saveBtn" type="submit" class="btn btn-primary" disabled>Сохранить</button> @: &nbsp; &nbsp;
     <a href="~/Response/QuestionnaireQuestion?id=@Model.NextId" class="btn btn-success@(!Model.NextId.HasValue?" disabled":"")">Вперёд</a>
 }
 
@@ -103,14 +104,25 @@
                 window.location.href = '@Url.Content($"~/Response/FinishQuestionnaire?id={Model.ResponseSessionId}")';
             }
         }, 1000);
-        $(function () {
-            $(".option").on('click', function () {
-                var input = $(this).find('input');
-                input.prop('checked', !input.prop('checked'));
+        $(() => {
+            const func = () => 
+            {
+                var count = $(".option input[type=radio]:checked, .option input[type=checkbox]:checked").length;
+                $("#saveBtn").prop('disabled', count > 0 ? false : true);
+            };
+
+            $(".option").on('click', function() {
+                 const input = $(this).find('input[type=radio], input[type=checkbox]');
+                 input.click();
             });
-            $("input").click(function (event) {
-                event.stopPropagation();
+
+            $("input").click((event) => {
+                 func();
+                 event.stopPropagation();
             });
+
+            func();
         });
+
     </script>
 }
